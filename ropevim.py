@@ -112,12 +112,11 @@ class VimUtils(ropemode.environment.Environment):
     def _position_to_offset(self, lineno, colno):
         result = min(colno, len(self.buffer[lineno - 1]) + 1)
         for line in self.buffer[:lineno-1]:
-            line = self._decode_line(line)
             result += len(line) + 1
         return result
 
     def get_text(self):
-        return self._decode_line('\n'.join(self.buffer)) + u'\n'
+        return '\n'.join(self.buffer) + u'\n'
 
     def get_region(self):
         beg_mark = self.buffer.mark('<')
@@ -135,14 +134,13 @@ class VimUtils(ropemode.environment.Environment):
 
     def _get_cursor(self):
         lineno, col = vim.current.window.cursor
-        line = self._decode_line(vim.current.line[:col])
+        line = vim.current.line[:col]
         col = len(line)
         return (lineno, col)
 
     def _set_cursor(self, cursor):
         lineno, col = cursor
-        line = self._decode_line(vim.current.line)
-        line = self._encode_line(line[:col])
+        line = vim.current.line[:col]
         col = len(line)
         vim.current.window.cursor = (lineno, col)
 
@@ -411,7 +409,7 @@ class VimProgress(object):
 
 
 def echo(message):
-    if isinstance(message, unicode):
+    if sys.version_info[0] < 3 and isinstance(message, unicode):
         message = message.encode(vim.eval('&encoding'))
     print(message)
 
